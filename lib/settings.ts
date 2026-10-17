@@ -9,8 +9,8 @@ const FALLBACK: Settings = {
   phone: "078 339 7863 / 0783 193 895",
   email: "info@ruwadental.co.zw",
   address: "1780 Runyararo Road, Ruwa",
-  openingHours: "Every day, 8AM to 6PM",
-  emergencyMessage: "Always open for emergencies",
+  openingHours: "Open 24 hours, every day",
+  emergencyMessage: "Open 24 hours for emergencies",
   medicalAids: "CIMAS, First Mutual, Alliance, MASCA and FBC",
   heroMessage: "Your gateway to healthy smiles — professional dental care for the whole family.",
   aboutText:

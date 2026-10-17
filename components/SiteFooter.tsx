@@ -50,6 +50,7 @@ export function SiteFooter({ s }: { s: Settings }) {
             <li className="flex gap-2.5"><Phone className="h-4 w-4 shrink-0 translate-y-0.5 text-accent-500" />{s.phone}</li>
             <li className="flex gap-2.5"><Mail className="h-4 w-4 shrink-0 translate-y-0.5 text-accent-500" /><a href={`mailto:${s.email}`} className="hover:text-white">{s.email}</a></li>
             <li className="flex gap-2.5"><Clock className="h-4 w-4 shrink-0 translate-y-0.5 text-accent-500" />{s.openingHours}</li>
+            <li className="flex gap-2.5 font-semibold text-white"><Phone className="h-4 w-4 shrink-0 translate-y-0.5 text-red-400" />{s.emergencyMessage}</li>
           </ul>
         </div>
         <div>

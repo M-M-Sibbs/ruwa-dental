@@ -6,7 +6,7 @@
 const PLACEHOLDER = /USER:PASSWORD@HOST/i;
 
 export function configuredDatabaseUrl(): string | null {
-  const url = process.env.DATABASE_URL?.trim();
+  const url = (process.env.DATABASE_URL || process.env.POSTGRES_URL)?.trim();
   if (!url || PLACEHOLDER.test(url)) return null;
   return url;
 }

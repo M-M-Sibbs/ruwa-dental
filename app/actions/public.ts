@@ -82,7 +82,7 @@ const bookingSchema = z.object({
   preferredTime: z
     .string()
     .regex(/^\d{2}:\d{2}$/, "Choose a time")
-    .refine((t) => t >= "08:00" && t <= "18:00", "Choose a time between 08:00 and 18:00"),
+    .refine((t) => t >= "00:00" && t <= "23:59", "Choose a valid time"),
   reason: opt(500),
 });
 

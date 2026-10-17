@@ -7,7 +7,8 @@ import * as schema from "../db/schema";
 import { seedDatabase } from "../db/seed";
 
 async function main() {
-  const direct = process.env.DIRECT_URL?.trim();
+  // Neon on Vercel provides DATABASE_URL_UNPOOLED; use it for setup work when present.
+  const direct = (process.env.DIRECT_URL || process.env.DATABASE_URL_UNPOOLED)?.trim();
   const url = direct && !/USER:PASSWORD@HOST/i.test(direct) ? direct : configuredDatabaseUrl();
   if (!url) {
     console.log("No DATABASE_URL set — the built-in local database seeds itself when you run `npm run dev`.");

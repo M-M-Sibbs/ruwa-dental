@@ -1,7 +1,7 @@
 // Starting content: settings, branch, services, the principal dentist and the
 // first administrator login. Safe to run more than once.
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { and, eq, ilike, isNull } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
@@ -17,6 +17,11 @@ const servicesSeed = [
   { name: "Dental Implants", shortDescription: "Implant-based tooth replacement planning and care." },
 ];
 
+/** Removes spaces and surrounding quotes people often paste into Vercel settings. */
+function clean(v: string | undefined) {
+  return (v ?? "").trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+}
+
 export async function seedDatabase(db: NodePgDatabase<typeof schema>) {
   const { siteSettings, branches, services, users, doctors, doctorServices } = schema;
 
@@ -28,8 +33,8 @@ export async function seedDatabase(db: NodePgDatabase<typeof schema>) {
       phone: "078 339 7863 / 0783 193 895",
       email: "info@ruwadental.co.zw",
       address: "1780 Runyararo Road, Ruwa",
-      openingHours: "Every day, 8AM to 6PM",
-      emergencyMessage: "Always open for emergencies",
+      openingHours: "Open 24 hours, every day",
+      emergencyMessage: "Open 24 hours for emergencies",
       medicalAids: "CIMAS, First Mutual, Alliance, MASCA and FBC",
       heroMessage: "Your gateway to healthy smiles — professional dental care for the whole family.",
       aboutText:
@@ -40,6 +45,19 @@ export async function seedDatabase(db: NodePgDatabase<typeof schema>) {
     })
     .onConflictDoNothing();
 
+  // Sites set up before the 24-hour emergency wording get it on their next deploy
+  // (only if the clinic hasn't written its own message in the Website CMS).
+  await db
+    .update(siteSettings)
+    .set({ emergencyMessage: "Open 24 hours for emergencies" })
+    .where(eq(siteSettings.emergencyMessage, "Always open for emergencies"));
+
+  // Earlier sites showed 8AM–6PM; the clinic is now open 24 hours.
+  await db
+    .update(siteSettings)
+    .set({ openingHours: "Open 24 hours, every day" })
+    .where(eq(siteSettings.openingHours, "Every day, 8AM to 6PM"));
+
   let [branch] = await db.select().from(branches).limit(1);
   if (!branch) {
     [branch] = await db.insert(branches).values({ name: "Ruwa Dental Center", address: "1780 Runyararo Road, Ruwa" }).returning();
@@ -49,9 +67,9 @@ export async function seedDatabase(db: NodePgDatabase<typeof schema>) {
     await db.insert(services).values(servicesSeed.map((s, i) => ({ ...s, sortOrder: i })));
   }
 
-  const adminEmail = (process.env.SEED_ADMIN_EMAIL || "admin@ruwadental.co.zw").toLowerCase();
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "ChangeMe!2026";
-  const [admin] = await db.select({ id: users.id }).from(users).where(eq(users.email, adminEmail));
+  const adminEmail = clean(process.env.SEED_ADMIN_EMAIL).toLowerCase() || "admin@ruwadental.co.zw";
+  const adminPassword = clean(process.env.SEED_ADMIN_PASSWORD) || "ChangeMe!2026";
+  const [admin] = await db.select().from(users).where(eq(users.email, adminEmail));
   if (!admin) {
     await db.insert(users).values({
       email: adminEmail,
@@ -59,15 +77,34 @@ export async function seedDatabase(db: NodePgDatabase<typeof schema>) {
       role: "ADMIN",
       passwordHash: await bcrypt.hash(adminPassword, 12),
     });
+  } else if (!admin.passwordChangedAt && !(await bcrypt.compare(adminPassword, admin.passwordHash))) {
+    // Until the admin sets their own password in Admin → Account, the login
+    // follows SEED_ADMIN_PASSWORD, so changing it in Vercel and redeploying works.
+    await db
+      .update(users)
+      .set({ passwordHash: await bcrypt.hash(adminPassword, 12), active: true })
+      .where(eq(users.id, admin.id));
   }
 
   if ((await db.select({ id: doctors.id }).from(doctors)).length === 0) {
     const [doc] = await db
       .insert(doctors)
-      .values({ fullName: "Dr Tapiwa Gwenhamo", specialty: "Dental Surgeon", qualifications: "BDS (UZ)", branchId: branch.id })
+      .values({
+        fullName: "Dr Tapiwa Gwenhamo",
+        specialty: "Dental Surgeon",
+        qualifications: "BDS (UZ)",
+        email: "tapiwagwenhamo2023@gmail.com",
+        branchId: branch.id,
+      })
       .returning();
     const all = await db.select({ id: services.id }).from(services);
     if (all.length) await db.insert(doctorServices).values(all.map((s) => ({ doctorId: doc.id, serviceId: s.id })));
   }
+  // Add Dr Gwenhamo's contact email on sites created before it was known.
+  await db
+    .update(doctors)
+    .set({ email: "tapiwagwenhamo2023@gmail.com" })
+    .where(and(ilike(doctors.fullName, "%Gwenhamo%"), isNull(doctors.email)));
+
   return adminEmail;
 }

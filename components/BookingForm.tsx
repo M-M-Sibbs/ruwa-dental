@@ -103,12 +103,10 @@ export function BookingForm({
           label="Preferred time"
           name="preferredTime"
           type="time"
-          min="08:00"
-          max="18:00"
           step={900}
           defaultValue={v.preferredTime}
           error={e.preferredTime}
-          hint="Open every day, 08:00 to 18:00."
+          hint="We are open 24 hours. For an emergency, call or WhatsApp us straight away."
         />
         <div className="sm:col-span-2">
           <label className="label" htmlFor="reason">Reason for visit (optional)</label>

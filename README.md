@@ -29,18 +29,22 @@ If anything about the database is wrong, the site shows a "Setup needed" page sa
 
 ## Deploy to Vercel
 
-1. Push this folder to a GitHub repository.
-2. In Vercel, **Add New → Project** and import the repository. The framework is detected as Next.js.
-3. In the project, open **Storage → Create Database → Neon (Postgres)** and connect it. This adds `DATABASE_URL`.
-   Add `DIRECT_URL` with the same value (or Neon's unpooled URL).
-4. Under **Settings → Environment Variables**, add `AUTH_SECRET` (run `openssl rand -base64 32`) and
-   `NEXT_PUBLIC_SITE_URL` (e.g. `https://ruwadental.co.zw`). Add the WhatsApp variables when ready.
-5. Deploy. The `vercel-build` script applies database migrations automatically before each build.
-6. Load the starting content once, from your computer, pointing at the live database:
-   ```bash
-   DATABASE_URL="<neon url>" DIRECT_URL="<neon url>" SEED_ADMIN_PASSWORD="<strong password>" npm run db:seed
-   ```
-7. **Settings → Domains:** add `ruwadental.co.zw` and point its DNS at Vercel. HTTPS is automatic.
+1. Put the project on GitHub (GitHub Desktop: File → Add local repository → choose this folder → Publish repository, private).
+2. In Vercel: **Add New → Project**, import the repository. Don't deploy yet if it offers; first open **Environment Variables** and add:
+   - `AUTH_SECRET` — any random text of 32+ characters
+   - `SEED_ADMIN_PASSWORD` — the password for the first admin login
+   - `NEXT_PUBLIC_SITE_URL` — e.g. `https://ruwadental.co.zw` (or the `.vercel.app` address for now)
+3. Deploy. The first deploy may fail because there's no database yet — that's expected.
+4. In the project, open **Storage → Create Database → Neon**, and connect it to the project (all environments).
+   This adds `DATABASE_URL` and `DATABASE_URL_UNPOOLED` automatically.
+5. **Deployments → ⋯ on the latest → Redeploy.** Each build creates/updates the tables and loads the starting
+   content (clinic details, 6 services, Dr Tapiwa Gwenhamo, the admin login). Running it again never duplicates anything.
+6. Open `/admin` on the live site, sign in with `admin@ruwadental.co.zw` and your `SEED_ADMIN_PASSWORD`.
+   Until you set your own password in Admin → Account, every deploy keeps the admin login matched to
+   `SEED_ADMIN_PASSWORD` — so if you change it in Vercel, just redeploy. After you change it in Account, deploys leave it alone.
+7. **Settings → Domains:** add `ruwadental.co.zw` and set the DNS records Vercel shows at your domain registrar. HTTPS is automatic.
+
+From then on, every change pushed to GitHub deploys automatically.
 
 ## WhatsApp booking alerts
 

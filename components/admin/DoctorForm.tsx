@@ -13,6 +13,7 @@ export type DoctorValues = {
   qualifications?: string;
   bio?: string;
   phone?: string;
+  publicEmail?: string;
   branchId?: string;
   active?: boolean;
   email?: string;
@@ -38,6 +39,13 @@ export function DoctorForm({ initial, branches, services }: { initial?: DoctorVa
       <TextField label="Specialty" name="specialty" defaultValue={v.specialty ?? "Dental Surgeon"} />
       <TextField label="Qualifications" name="qualifications" defaultValue={v.qualifications} placeholder="BDS (UZ)" />
       <TextField label="Phone" name="phone" type="tel" defaultValue={v.phone} />
+      <TextField
+        label="Contact email (shown on the website)"
+        name="publicEmail"
+        type="email"
+        defaultValue={v.publicEmail}
+        className="sm:col-span-2"
+      />
       <AreaField label="Short bio (shown on the website)" name="bio" defaultValue={v.bio} className="sm:col-span-2" />
       {initial?.hasLogin ? (
         <TextField label="Login email" name="email" value={initial.email} readOnly className="opacity-70" />

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s · Ruwa Dental Center",
   },
   description:
-    "Professional dental care for the whole family in Ruwa. Exams, cleaning, fillings, root canals, dentures, crowns and implants. Open every day, 8AM to 6PM. Book online.",
+    "Professional dental care for the whole family in Ruwa. Exams, cleaning, fillings, root canals, dentures, crowns and implants. Open 24 hours, every day. Book online.",
   openGraph: {
     type: "website",
     siteName: "Ruwa Dental Center",

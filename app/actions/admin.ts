@@ -262,6 +262,7 @@ export async function createDoctor(_p: FormState, fd: FormData): Promise<FormSta
       qualifications: optStr(fd, "qualifications"),
       bio: optStr(fd, "bio"),
       phone: optStr(fd, "phone"),
+      email: optStr(fd, "publicEmail"),
       branchId: optStr(fd, "branchId"),
       userId,
     })
@@ -289,6 +290,7 @@ export async function updateDoctor(_p: FormState, fd: FormData): Promise<FormSta
       qualifications: optStr(fd, "qualifications"),
       bio: optStr(fd, "bio"),
       phone: optStr(fd, "phone"),
+      email: optStr(fd, "publicEmail"),
       branchId: optStr(fd, "branchId"),
       active: fd.get("active") === "on",
     })
@@ -461,7 +463,7 @@ export async function changePassword(_p: FormState, fd: FormData): Promise<FormS
   if (!row || !(await bcrypt.compare(current, row.passwordHash))) return { ok: false, errors: { current: "Incorrect password" } };
   if (next.length < 8) return { ok: false, errors: { next: "At least 8 characters" } };
   if (next !== confirm) return { ok: false, errors: { confirm: "Passwords don't match" } };
-  await db.update(users).set({ passwordHash: await bcrypt.hash(next, 12) }).where(eq(users.id, user.id));
+  await db.update(users).set({ passwordHash: await bcrypt.hash(next, 12), passwordChangedAt: new Date() }).where(eq(users.id, user.id));
   await audit(user.id, "password_change", "user", user.id);
   return { ok: true, message: "Password changed" };
 }

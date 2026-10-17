@@ -21,6 +21,7 @@ export default async function HomePage() {
   ]);
 
   const aids = s.medicalAids;
+  const emergencyTel = "+263" + s.phone.split("/")[0].replace(/\D/g, "").replace(/^0/, "");
   const greeting = `Hello ${s.clinicName}, I would like to enquire about an appointment.`;
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(s.mapQuery || s.address)}&output=embed`;
 
@@ -42,8 +43,8 @@ export default async function HomePage() {
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        opens: "08:00",
-        closes: "18:00",
+        opens: "00:00",
+        closes: "23:59",
       },
     ],
     sameAs: [s.facebookUrl, s.instagramUrl, s.linkedinUrl, s.tiktokUrl, s.youtubeUrl].filter(Boolean),
@@ -76,7 +77,7 @@ export default async function HomePage() {
               </Link>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-ink/75">
-              {["Open every day", "Emergency dental care", "Medical aids accepted"].map((t) => (
+              {["Open 24 hours", "24-hour emergency care", "Medical aids accepted"].map((t) => (
                 <li key={t} className="flex items-center gap-1.5">
                   <Check className="h-4 w-4 text-accent-600" /> {t}
                 </li>
@@ -89,7 +90,16 @@ export default async function HomePage() {
               <LogoMark size={148} />
             </div>
             <p className="mt-6 text-lg font-semibold text-ink">{s.openingHours}</p>
-            <p className="mt-2 text-muted">{s.emergencyMessage}</p>
+            <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-danger-bg px-3.5 py-1.5 text-sm font-semibold text-danger">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-danger" />
+              </span>
+              {s.emergencyMessage}
+            </p>
+            <a href={`tel:${emergencyTel}`} className="mt-2 block text-sm font-medium text-ink hover:text-accent-600">
+              Emergency line: {s.phone.split("/")[0].trim()}
+            </a>
             <div className="mt-6 grid gap-2">
               <Link href="/book-appointment" className="link inline-flex items-center justify-center gap-1.5">
                 Request appointment <Arrow />
@@ -160,6 +170,15 @@ export default async function HomePage() {
                       {doc.qualifications && <p className="text-sm text-muted">{doc.qualifications}</p>}
                     </div>
                   </div>
+                  {doc.email && (
+                    <a
+                      href={`mailto:${doc.email}`}
+                      className="mt-4 flex items-center gap-2 rounded-xl bg-accent-50 px-3 py-2.5 text-sm font-medium text-accent-700 hover:bg-accent-100"
+                    >
+                      <Mail className="h-4 w-4 shrink-0" />
+                      <span className="min-w-0 truncate">{doc.email}</span>
+                    </a>
+                  )}
                   {doc.bio && <p className="mt-4 text-sm leading-relaxed text-muted">{doc.bio}</p>}
                   <Link
                     href={`/book-appointment?doctor=${doc.id}`}

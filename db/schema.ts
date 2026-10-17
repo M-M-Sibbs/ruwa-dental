@@ -41,6 +41,8 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   role: roleEnum("role").notNull().default("ADMIN"),
   active: boolean("active").notNull().default(true),
+  // Set when the person changes their own password in Admin → Account.
+  passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
   ...timestamps,
 });
 
@@ -58,6 +60,8 @@ export const doctors = pgTable("doctors", {
   qualifications: text("qualifications"),
   bio: text("bio"),
   phone: text("phone"),
+  // Public contact email shown on the website's doctor card (separate from the login).
+  email: text("email"),
   active: boolean("active").notNull().default(true),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   userId: text("user_id")

@@ -6,7 +6,8 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 
 async function main() {
-  const direct = process.env.DIRECT_URL?.trim();
+  // Neon on Vercel provides DATABASE_URL_UNPOOLED; use it for setup work when present.
+  const direct = (process.env.DIRECT_URL || process.env.DATABASE_URL_UNPOOLED)?.trim();
   const url = direct && !/USER:PASSWORD@HOST/i.test(direct) ? direct : configuredDatabaseUrl();
   if (!url) {
     if (process.env.VERCEL) throw new Error("DATABASE_URL is not set in Vercel → Settings → Environment Variables");

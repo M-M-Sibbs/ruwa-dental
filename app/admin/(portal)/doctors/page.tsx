@@ -55,6 +55,7 @@ export default async function DoctorsPage() {
                         qualifications: d.qualifications ?? "",
                         bio: d.bio ?? "",
                         phone: d.phone ?? "",
+                        publicEmail: d.email ?? "",
                         branchId: d.branchId ?? "",
                         active: d.active,
                         email: email ?? "",

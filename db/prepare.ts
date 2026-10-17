@@ -48,6 +48,17 @@ function explain(e: unknown): DbProblem {
   const msg = `${err.message ?? ""} ${err.cause?.message ?? ""}`;
   console.error("Database check failed:", msg);
 
+  if (shouldUseEmbeddedDatabase()) {
+    return {
+      title: "The built-in local database couldn't start",
+      detail: "Its files in the .data folder are damaged or still in use by another copy of the app.",
+      steps: [
+        "Stop every running copy of the app (Ctrl+C in each terminal).",
+        "Delete the .data folder inside the project. This only removes local test data.",
+        "Run npm run dev again. A fresh database is created automatically.",
+      ],
+    };
+  }
   if (!configuredDatabaseUrl() && process.env.VERCEL) {
     return {
       title: "The database isn't connected yet",
