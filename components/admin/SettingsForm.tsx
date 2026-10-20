@@ -25,6 +25,7 @@ export function SettingsForm({ initial }: { initial: S }) {
         {f("address", "Address")}
         {f("openingHours", "Opening hours")}
         {f("emergencyMessage", "Emergency message")}
+        {f("emergencyPhone", "Emergency line (also used by the floating WhatsApp button)", { placeholder: "0783 193 895" })}
         {f("whatsappNumber", "WhatsApp number (receives booking alerts)", { placeholder: "263783397863" })}
         {f("mapQuery", "Map location (search text for Google Maps)")}
         <AreaField label="Accepted medical aids" name="medicalAids" defaultValue={v.medicalAids} error={e.medicalAids} className="sm:col-span-2" />

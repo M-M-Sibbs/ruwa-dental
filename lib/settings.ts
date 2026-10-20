@@ -11,11 +11,12 @@ const FALLBACK: Settings = {
   address: "1780 Runyararo Road, Ruwa",
   openingHours: "Open 24 hours, every day",
   emergencyMessage: "Open 24 hours for emergencies",
-  medicalAids: "CIMAS, First Mutual, Alliance, MASCA and FBC",
+  medicalAids: "CIMAS, First Mutual, Alliance, MASCA, FBC, Bonvie, PSMAS, Quest, CALM and Maisha",
   heroMessage: "Your gateway to healthy smiles — professional dental care for the whole family.",
   aboutText:
     "We provide patient-centred dental care with a focus on comfort, clear communication and continuity.",
   whatsappNumber: "263783397863",
+  emergencyPhone: "0783 193 895",
   mapQuery: "1780 Runyararo Road, Ruwa, Zimbabwe",
   facebookUrl: "https://www.facebook.com/share/1JhMVQYnHz/",
   instagramUrl: null,

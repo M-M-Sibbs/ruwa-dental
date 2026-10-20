@@ -3,8 +3,10 @@ import type { Settings } from "@/db/schema";
 import { Logo } from "./Logo";
 import { Facebook, Instagram, Linkedin, Mail, Phone, Pin, Tiktok, WhatsApp, Youtube, Clock } from "./Icons";
 import { waLink } from "@/lib/whatsapp";
+import { emergencyPhone, slugify, telHref } from "@/lib/site";
 
-export function SiteFooter({ s }: { s: Settings }) {
+export function SiteFooter({ s, services = [] }: { s: Settings; services?: string[] }) {
+  const emergency = emergencyPhone(s);
   const socials = [
     { url: s.facebookUrl, label: "Facebook", Icon: Facebook },
     { url: s.instagramUrl, label: "Instagram", Icon: Instagram },
@@ -15,7 +17,7 @@ export function SiteFooter({ s }: { s: Settings }) {
 
   return (
     <footer className="bg-navy-950 text-white/75">
-      <div className="container-x grid gap-10 py-14 md:grid-cols-[1.3fr_1fr_1fr]">
+      <div className="container-x grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
         <div>
           <Logo clinicName={s.clinicName} light />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/60">{s.heroMessage}</p>
@@ -50,7 +52,11 @@ export function SiteFooter({ s }: { s: Settings }) {
             <li className="flex gap-2.5"><Phone className="h-4 w-4 shrink-0 translate-y-0.5 text-accent-500" />{s.phone}</li>
             <li className="flex gap-2.5"><Mail className="h-4 w-4 shrink-0 translate-y-0.5 text-accent-500" /><a href={`mailto:${s.email}`} className="hover:text-white">{s.email}</a></li>
             <li className="flex gap-2.5"><Clock className="h-4 w-4 shrink-0 translate-y-0.5 text-accent-500" />{s.openingHours}</li>
-            <li className="flex gap-2.5 font-semibold text-white"><Phone className="h-4 w-4 shrink-0 translate-y-0.5 text-red-400" />{s.emergencyMessage}</li>
+            <li className="flex gap-2.5 font-semibold text-white">
+              <Phone className="h-4 w-4 shrink-0 translate-y-0.5 text-red-400" />
+              <a href={telHref(emergency)} className="hover:underline">Emergency line: {emergency}</a>
+            </li>
+            <li className="pl-6.5 text-white/60">{s.emergencyMessage}</li>
           </ul>
         </div>
         <div>
@@ -58,9 +64,20 @@ export function SiteFooter({ s }: { s: Settings }) {
           <ul className="mt-4 space-y-3 text-sm">
             <li><Link href="/book-appointment" className="hover:text-white">Book an appointment</Link></li>
             <li><Link href="/track-booking" className="hover:text-white">Track your booking</Link></li>
-            <li><Link href="/#services" className="hover:text-white">Our services</Link></li>
+            <li><Link href="/emergency-dentist" className="hover:text-white">Emergency dentist</Link></li>
+            <li><Link href="/medical-aids" className="hover:text-white">Medical aids</Link></li>
             <li><Link href="/#feedback" className="hover:text-white">Share feedback</Link></li>
             <li><Link href="/privacy" className="hover:text-white">Privacy notice</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-white">Dental services in Ruwa</h2>
+          <ul className="mt-4 space-y-3 text-sm">
+            {services.map((name) => (
+              <li key={name}>
+                <Link href={`/services/${slugify(name)}`} className="hover:text-white">{name}</Link>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

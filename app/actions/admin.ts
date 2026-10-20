@@ -430,6 +430,7 @@ const settingsSchema = z.object({
     .transform((v) => v.replace(/\D/g, ""))
     .refine((v) => /^263\d{9}$/.test(v), "Use international format, e.g. 263783397863"),
   mapQuery: z.string().trim().optional(),
+  emergencyPhone: z.string().trim().max(40).optional(),
   facebookUrl: urlOrEmpty,
   instagramUrl: urlOrEmpty,
   linkedinUrl: urlOrEmpty,

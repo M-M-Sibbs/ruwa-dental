@@ -203,6 +203,8 @@ export const siteSettings = pgTable("site_settings", {
   heroMessage: text("hero_message").notNull(),
   aboutText: text("about_text").notNull(),
   whatsappNumber: text("whatsapp_number").notNull(),
+  // Emergency line, also used by the floating "Chat on WhatsApp" button.
+  emergencyPhone: text("emergency_phone"),
   mapQuery: text("map_query"),
   facebookUrl: text("facebook_url"),
   instagramUrl: text("instagram_url"),

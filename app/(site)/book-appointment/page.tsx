@@ -5,8 +5,9 @@ import { BookingForm } from "@/components/BookingForm";
 import { todayISO } from "@/lib/dates";
 
 export const metadata: Metadata = {
-  title: "Book an appointment",
-  description: "Request a dental appointment at Ruwa Dental Center. Choose a service, doctor, date and time.",
+  title: "Book a Dentist Appointment in Ruwa",
+  description: "Book a dental appointment online at Ruwa Dental Center, Ruwa. Choose a service, dentist, date and time. Open 24 hours.",
+  alternates: { canonical: "/book-appointment" },
 };
 
 export default async function BookPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {

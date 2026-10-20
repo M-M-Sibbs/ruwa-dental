@@ -4,6 +4,7 @@ import { TrackForm } from "@/components/TrackForm";
 export const metadata: Metadata = {
   title: "Track your booking",
   description: "Check the status of your Ruwa Dental Center appointment with your booking code and phone number.",
+  alternates: { canonical: "/track-booking" },
 };
 
 export default function TrackPage() {

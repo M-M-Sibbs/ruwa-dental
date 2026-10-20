@@ -1,5 +1,5 @@
 import "server-only";
-import { waDigits } from "./phone";
+import { intlDigits } from "./site";
 
 export type BookingAlert = {
   trackingCode: string;
@@ -30,7 +30,7 @@ export function bookingText(b: BookingAlert, forClinic = true) {
 }
 
 export function waLink(number: string, text: string) {
-  return `https://wa.me/${waDigits(number)}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${intlDigits(number)}?text=${encodeURIComponent(text)}`;
 }
 
 /**
@@ -46,7 +46,7 @@ export function waLink(number: string, text: string) {
 export async function sendClinicBookingAlert(b: BookingAlert, clinicNumber: string): Promise<boolean> {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const to = waDigits(process.env.CLINIC_WHATSAPP_TO || clinicNumber);
+  const to = intlDigits(process.env.CLINIC_WHATSAPP_TO || clinicNumber);
   if (!token || !phoneNumberId) return false;
 
   const template = process.env.WHATSAPP_TEMPLATE_NAME;

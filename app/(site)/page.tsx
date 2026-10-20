@@ -7,6 +7,15 @@ import { LogoMark } from "@/components/Logo";
 import { Arrow, Check, Clock, Mail, Phone, Pin, Plus, Sparkle, WhatsApp } from "@/components/Icons";
 import { Stars } from "@/components/Stars";
 import { FeedbackForm } from "@/components/FeedbackForm";
+import { JsonLd } from "@/components/JsonLd";
+import { dentistJsonLd, faqJsonLd } from "@/lib/structured-data";
+import { homeFaqs } from "@/lib/faqs";
+import { AREAS_SERVED, emergencyPhone, slugify, splitList, telHref } from "@/lib/site";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   const s = await getSettings();
@@ -20,40 +29,16 @@ export default async function HomePage() {
     db.select().from(feedback).where(eq(feedback.published, true)).orderBy(desc(feedback.createdAt)).limit(6),
   ]);
 
-  const aids = s.medicalAids;
-  const emergencyTel = "+263" + s.phone.split("/")[0].replace(/\D/g, "").replace(/^0/, "");
+  const aids = splitList(s.medicalAids);
+  const emergency = emergencyPhone(s);
+  const faqs = homeFaqs(s, doctorList);
   const greeting = `Hello ${s.clinicName}, I would like to enquire about an appointment.`;
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(s.mapQuery || s.address)}&output=embed`;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Dentist",
-    name: s.clinicName,
-    image: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/brand/logo.png`,
-    url: process.env.NEXT_PUBLIC_SITE_URL || undefined,
-    telephone: s.phone.split("/")[0].trim(),
-    email: s.email,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: s.address.split(",")[0],
-      addressLocality: "Ruwa",
-      addressCountry: "ZW",
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        opens: "00:00",
-        closes: "23:59",
-      },
-    ],
-    sameAs: [s.facebookUrl, s.instagramUrl, s.linkedinUrl, s.tiktokUrl, s.youtubeUrl].filter(Boolean),
-    medicalSpecialty: "Dentistry",
-  };
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd data={dentistJsonLd(s, serviceList, doctorList)} />
+      <JsonLd data={faqJsonLd(faqs)} />
 
       {/* ---------- Hero ---------- */}
       <section className="relative overflow-hidden bg-gradient-to-b from-accent-50 via-accent-50/60 to-white">
@@ -63,8 +48,8 @@ export default async function HomePage() {
         />
         <div className="container-x relative grid items-center gap-12 py-14 md:grid-cols-[1.35fr_1fr] md:py-20">
           <div>
-            <p className="eyebrow">{s.clinicName} • Healthy smiles</p>
-            <h1 className="h-display mt-5 text-[2.6rem] leading-[1.02] sm:text-6xl">
+            <h1 className="h-display text-[2.6rem] leading-[1.02] sm:text-6xl">
+              <span className="eyebrow mb-5 block leading-normal">Dentist in Ruwa, Zimbabwe • Open 24 hours</span>
               Smile bright with <span className="text-accent-500">{s.clinicName}.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">{s.heroMessage}</p>
@@ -87,7 +72,7 @@ export default async function HomePage() {
 
           <div className="card relative mx-auto w-full max-w-sm p-8 text-center shadow-lift">
             <div className="mx-auto w-fit">
-              <LogoMark size={148} />
+              <LogoMark size={148} alt={`${s.clinicName} logo`} />
             </div>
             <p className="mt-6 text-lg font-semibold text-ink">{s.openingHours}</p>
             <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-danger-bg px-3.5 py-1.5 text-sm font-semibold text-danger">
@@ -97,8 +82,8 @@ export default async function HomePage() {
               </span>
               {s.emergencyMessage}
             </p>
-            <a href={`tel:${emergencyTel}`} className="mt-2 block text-sm font-medium text-ink hover:text-accent-600">
-              Emergency line: {s.phone.split("/")[0].trim()}
+            <a href={telHref(emergency)} className="mt-3 block text-base font-semibold text-ink hover:text-accent-600">
+              Emergency line: <span className="whitespace-nowrap">{emergency}</span>
             </a>
             <div className="mt-6 grid gap-2">
               <Link href="/book-appointment" className="link inline-flex items-center justify-center gap-1.5">
@@ -122,9 +107,10 @@ export default async function HomePage() {
         <div className="container-x">
           <div className="max-w-2xl">
             <p className="eyebrow">Our services</p>
-            <h2 className="h-display mt-4 text-3xl sm:text-4xl">Complete care for every smile.</h2>
+            <h2 className="h-display mt-4 text-3xl sm:text-4xl">Dental services in Ruwa.</h2>
             <p className="mt-4 leading-relaxed text-muted">
-              From routine examinations and cleaning to restorative and replacement dentistry.
+              Complete care for every smile, from routine examinations and cleaning to restorative and replacement
+              dentistry, all at one clinic on Runyararo Road.
             </p>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -133,15 +119,21 @@ export default async function HomePage() {
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-accent-50 text-accent-500">
                   <Sparkle className="h-5 w-5" />
                 </span>
-                <h3 className="mt-5 text-lg font-semibold tracking-tight text-ink">{svc.name}</h3>
+                <h3 className="mt-5 text-lg font-semibold tracking-tight text-ink">
+                  <Link href={`/services/${slugify(svc.name)}`} className="hover:text-accent-700">
+                    {svc.name}
+                  </Link>
+                </h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">{svc.shortDescription}</p>
                 {svc.price && <p className="mt-3 text-sm font-semibold text-ink">From {svc.price}</p>}
-                <Link
-                  href={`/book-appointment?service=${svc.id}`}
-                  className="link mt-5 inline-flex items-center gap-1.5 text-sm"
-                >
-                  Book this service <Arrow />
-                </Link>
+                <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+                  <Link href={`/book-appointment?service=${svc.id}`} className="link inline-flex items-center gap-1.5">
+                    Book this service <Arrow />
+                  </Link>
+                  <Link href={`/services/${slugify(svc.name)}`} className="font-medium text-muted hover:text-ink">
+                    Learn more<span className="sr-only"> about {svc.name}</span>
+                  </Link>
+                </div>
               </article>
             ))}
           </div>
@@ -153,7 +145,7 @@ export default async function HomePage() {
         <div className="container-x">
           <div className="max-w-2xl">
             <p className="eyebrow">Our dentists</p>
-            <h2 className="h-display mt-4 text-3xl sm:text-4xl">Meet the clinical team.</h2>
+            <h2 className="h-display mt-4 text-3xl sm:text-4xl">Meet your dentist in Ruwa.</h2>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {doctorList.map((doc) => {
@@ -204,7 +196,7 @@ export default async function HomePage() {
               {[
                 { n: `${doctorList.length}+`, l: "Dental professionals" },
                 { n: `${serviceList.length}+`, l: "Dental services" },
-                { n: "7 days", l: "Open weekly" },
+                { n: "24/7", l: "Open every day" },
               ].map((x) => (
                 <div key={x.l}>
                   <dt className="sr-only">{x.l}</dt>
@@ -217,10 +209,56 @@ export default async function HomePage() {
           <div className="rounded-2xl bg-navy-800 p-8 text-white shadow-lift">
             <Plus className="h-7 w-7 text-accent-500" />
             <h3 className="mt-4 text-xl font-semibold">Medical aids accepted</h3>
-            <p className="mt-3 leading-relaxed text-white/80">{aids}</p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {aids.map((a) => (
+                <li key={a} className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90">{a}</li>
+              ))}
+            </ul>
             <p className="mt-5 text-sm leading-relaxed text-white/60">
               Contact the clinic to confirm your cover and any applicable terms.
             </p>
+            <Link href="/medical-aids" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-100 hover:text-white">
+              Medical aid details <Arrow />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Local + FAQ ---------- */}
+      <section id="faq" className="bg-surface py-20 md:py-24">
+        <div className="container-x grid gap-10 lg:grid-cols-[1fr_1.3fr]">
+          <div>
+            <p className="eyebrow">Your local dental clinic</p>
+            <h2 className="h-display mt-4 text-3xl sm:text-4xl">A trusted dentist in Ruwa, open 24 hours.</h2>
+            <p className="mt-5 leading-relaxed text-muted">
+              {s.clinicName} is a family dental clinic at {s.address}. We look after patients from across Ruwa and the
+              surrounding areas, with check-ups, cleaning, fillings, root canals, extractions, dentures, crowns, bridges
+              and implants, plus round-the-clock care for dental emergencies.
+            </p>
+            <h3 className="mt-8 text-sm font-semibold text-ink">Areas we serve</h3>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {AREAS_SERVED.map((a) => (
+                <li key={a} className="rounded-full border border-line bg-white px-3 py-1 text-sm text-ink/80">{a}</li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/emergency-dentist" className="btn-soft">Emergency dentist</Link>
+              <Link href="/medical-aids" className="btn-soft">Medical aids</Link>
+            </div>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Frequently asked questions</h2>
+            <div className="mt-5 divide-y divide-line rounded-2xl border border-line bg-white">
+              {faqs.map((f, i) => (
+                <details key={f.q} className="group px-5 py-4" open={i === 0}>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-ink">
+                    <h3>{f.q}</h3>
+                    <span className="text-accent-600 transition group-open:rotate-45" aria-hidden>+</span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-muted">{f.a}</p>
+                </details>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -234,6 +272,10 @@ export default async function HomePage() {
             <ul className="mt-6 space-y-3 text-white/85">
               <li className="flex gap-3"><Pin className="h-5 w-5 shrink-0 text-accent-500" />{s.address}</li>
               <li className="flex gap-3"><Phone className="h-5 w-5 shrink-0 text-accent-500" />{s.phone}</li>
+              <li className="flex gap-3">
+                <Phone className="h-5 w-5 shrink-0 text-red-400" />
+                <a href={telHref(emergency)} className="font-semibold text-white hover:underline">Emergency line (24 hours): {emergency}</a>
+              </li>
               <li className="flex gap-3"><Mail className="h-5 w-5 shrink-0 text-accent-500" /><a href={`mailto:${s.email}`} className="hover:text-white">{s.email}</a></li>
               <li className="flex gap-3"><Clock className="h-5 w-5 shrink-0 text-accent-500" />{s.openingHours} · {s.emergencyMessage}</li>
             </ul>

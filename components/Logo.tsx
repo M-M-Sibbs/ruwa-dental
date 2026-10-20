@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export function LogoMark({ size = 40, tile = false }: { size?: number; tile?: boolean }) {
-  const img = <Image src="/brand/logo.png" alt="" width={size} height={size} priority />;
+export function LogoMark({ size = 40, tile = false, alt = "" }: { size?: number; tile?: boolean; alt?: string }) {
+  const img = <Image src="/brand/logo.png" alt={alt} width={size} height={size} priority />;
   if (!tile) return img;
   return <span className="inline-flex rounded-xl bg-white p-1 shadow-sm">{img}</span>;
 }

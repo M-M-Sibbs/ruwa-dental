@@ -35,11 +35,12 @@ export async function seedDatabase(db: NodePgDatabase<typeof schema>) {
       address: "1780 Runyararo Road, Ruwa",
       openingHours: "Open 24 hours, every day",
       emergencyMessage: "Open 24 hours for emergencies",
-      medicalAids: "CIMAS, First Mutual, Alliance, MASCA and FBC",
+      medicalAids: "CIMAS, First Mutual, Alliance, MASCA, FBC, Bonvie, PSMAS, Quest, CALM and Maisha",
       heroMessage: "Your gateway to healthy smiles — professional dental care for the whole family.",
       aboutText:
         "We provide patient-centred dental care with a focus on comfort, clear communication and continuity. Your previous visits, treatments and prescriptions are kept securely in your clinic record for future care.",
       whatsappNumber: "263783397863",
+      emergencyPhone: "0783 193 895",
       mapQuery: "1780 Runyararo Road, Ruwa, Zimbabwe",
       facebookUrl: "https://www.facebook.com/share/1JhMVQYnHz/",
     })
@@ -57,6 +58,13 @@ export async function seedDatabase(db: NodePgDatabase<typeof schema>) {
     .update(siteSettings)
     .set({ openingHours: "Open 24 hours, every day" })
     .where(eq(siteSettings.openingHours, "Every day, 8AM to 6PM"));
+
+  // Newer details for sites set up earlier (only where the clinic hasn't edited them).
+  await db
+    .update(siteSettings)
+    .set({ medicalAids: "CIMAS, First Mutual, Alliance, MASCA, FBC, Bonvie, PSMAS, Quest, CALM and Maisha" })
+    .where(eq(siteSettings.medicalAids, "CIMAS, First Mutual, Alliance, MASCA and FBC"));
+  await db.update(siteSettings).set({ emergencyPhone: "0783 193 895" }).where(isNull(siteSettings.emergencyPhone));
 
   let [branch] = await db.select().from(branches).limit(1);
   if (!branch) {

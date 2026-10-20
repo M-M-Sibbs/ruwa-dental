@@ -46,6 +46,25 @@ If anything about the database is wrong, the site shows a "Setup needed" page sa
 
 From then on, every change pushed to GitHub deploys automatically.
 
+## Getting found on Google ("dentist in Ruwa")
+
+Built into the site: search-friendly titles and descriptions on every page, a page per service
+(`/services/...`), an emergency dentist page, a medical aids page, an FAQ, areas served, `sitemap.xml`,
+`robots.txt`, a share image, and schema.org data describing the clinic (Dentist, address, 24-hour hours,
+emergency line, services, dentist, FAQs).
+
+Do these once the site is live — the Google Business Profile matters most for local searches:
+
+1. **Google Business Profile** (business.google.com): create or claim "Ruwa Dental Center", category **Dentist**,
+   the same address and phone as the website, hours **Open 24 hours**, website `https://www.ruwadental.site`,
+   photos of the clinic, and ask happy patients to leave Google reviews.
+2. **Google Search Console** (search.google.com/search-console): add the property, verify it (DNS TXT record in
+   Namecheap, or put the HTML tag code in the `GOOGLE_SITE_VERIFICATION` Vercel setting and redeploy), then
+   submit `https://www.ruwadental.site/sitemap.xml`.
+3. **Bing Webmaster Tools**: import from Search Console.
+4. Link to the website from the clinic's Facebook page and any directories, always with the same name,
+   address and phone number.
+
 ## WhatsApp booking alerts
 
 Every booking is saved first. The clinic is then alerted on WhatsApp, and the patient's confirmation page

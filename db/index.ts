@@ -37,5 +37,16 @@ function create(): DB {
   throw new Error("DATABASE_URL is not set. Add it in Vercel → Settings → Environment Variables.");
 }
 
-export const db: DB = g.__rdcDb ?? (g.__rdcDb = create());
+// Connect on first use, so builds and imports never open a connection.
+function instance(): DB {
+  return g.__rdcDb ?? (g.__rdcDb = create());
+}
+
+export const db = new Proxy({} as DB, {
+  get(_target, prop) {
+    const real = instance();
+    const value = Reflect.get(real as object, prop, real);
+    return typeof value === "function" ? value.bind(real) : value;
+  },
+}) as DB;
 export * from "./schema";
